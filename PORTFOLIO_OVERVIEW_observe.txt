@@ -1,0 +1,461 @@
+================================================================================
+LANGGRAPH-OBSERVE: PRODUCTION OBSERVABILITY PLATFORM FOR AI AGENTS
+Comprehensive Project Overview, Technical Case Study & Portfolio Dossier
+================================================================================
+
+Role:             Creator & Lead Systems Engineer
+Domain:           AI Infrastructure / Distributed Systems / Developer Tooling
+Language & Stack: Python 3.9+, FastAPI, Starlette, LangGraph, LangChain Core,
+                  Pydantic v2, SQLAlchemy, SQLite (WAL mode), PyMySQL,
+                  Tailwind CSS, Mermaid.js, PyInstaller
+Testing Quality:  101 Unit & Integration Tests (100% Pass Rate across 17 test suites)
+License:          MIT License
+
+
+================================================================================
+1. EXECUTIVE SUMMARY & VALUE PROPOSITION
+================================================================================
+
+LangGraph-Observe is an enterprise-grade, lightweight, and completely decoupled
+observability platform engineered specifically for stateful AI agents and
+cyclical workflows built on LangGraph and FastAPI.
+
+Modern AI applications have evolved beyond simple linear prompt-response chains
+into multi-agent, cyclic, and asynchronous graph networks. While general-purpose
+application performance monitoring (APM) tools like Datadog and New Relic treat
+LLM operations as opaque external HTTP requests, and proprietary vendors like
+LangSmith introduce heavy cloud dependencies and steep recurring fees,
+LangGraph-Observe delivers a high-performance, self-hosted alternative with:
+
+  * Zero runtime latency impact via non-blocking, fail-open asynchronous queues.
+  * Concurrency-safe, deterministic execution tree tracing across parallel fan-outs.
+  * Real-time state delta diffing before and after each node execution.
+  * Heuristic detection of infinite agent loops and runaway tool cycles.
+  * Comprehensive token economics and live cost estimation across 5 major AI providers.
+  * Strict client-side PII scrubbing and credential redaction prior to network egress.
+  * A single-binary Windows executable (.exe) with zero external runtime requirements.
+
+
+================================================================================
+2. THE PROBLEM STATEMENT & INDUSTRY CONTEXT
+================================================================================
+
+Stateful agentic architectures introduce critical failure modes that standard
+software monitoring cannot diagnose:
+
+1. Silent State Corruption & Drift:
+   In LangGraph, state is passed and mutated across multiple graph nodes. An
+   errant node mutating an unexpected dictionary key or overwriting previous
+   context silently compromises downstream agents without throwing a fatal code error.
+
+2. Infinite Tool Loops & Runaway Cost:
+   Ambiguous tool outputs or model hallucination frequently cause agents to enter
+   cyclical invocation loops (calling the same search or query tool dozens of times),
+   consuming hundreds of dollars in API credits within minutes.
+
+3. Corrupted Traces Under Concurrency:
+   Traditional APMs utilize thread-local or Last-In-First-Out (LIFO) call stacks.
+   When LangGraph workflows execute parallel async branches (e.g., asyncio.gather),
+   stack-based tracers cross-contaminate spans, creating invalid or corrupted trees.
+
+4. Data Privacy Violations & Compliance Risks:
+   AI agent prompts and tool arguments often contain credentials, session tokens,
+   and customer Personally Identifiable Information (PII). Transmitting raw telemetry
+   to external cloud monitors violates SOC2, HIPAA, and GDPR regulations.
+
+5. Heavy Operational Overhead:
+   Existing open-source monitoring solutions require orchestrating complex
+   multi-container Docker environments (ClickHouse, Redis, vector DBs), making local
+   debugging and rapid air-gapped deployment difficult.
+
+LangGraph-Observe solves all of these challenges in a unified, lightweight package.
+
+
+================================================================================
+3. SYSTEM ARCHITECTURE & DATA FLOW
+================================================================================
+
+The platform is designed with a microservices-first, decoupled architecture.
+Telemetry generation is strictly decoupled from telemetry ingestion and storage.
+
++------------------------------------------------------------------------------+
+|                     CLIENT APPLICATION (FastAPI Backend)                    |
+|                                                                              |
+|  [Incoming Request]                                                          |
+|         │                                                                    |
+|         ▼                                                                    |
+|  [LangGraphObserveMiddleware]  --> Generates / correlates X-Trace-ID        |
+|         │                                                                    |
+|         ▼                                                                    |
+|  [observe_graph Wrapper]       --> Wraps compiled LangGraph runtime          |
+|         │                                                                    |
+|         ▼                                                                    |
+|  [LangGraphTraceCallbackHandler]                                             |
+|     ├── Maps LangChain run_id & parent_run_id hierarchy (thread-safe)        |
+|     ├── Extracts graph topology (nodes, edges, conditional branches)         |
+|     └── Captures pre/post node states for delta diffing                     |
+|         │                                                                    |
+|         ▼                                                                    |
+|  [PIIMasker & Safe Serializer] --> Redacts secrets, keys, and PII in-place   |
+|         │                                                                    |
+|         ▼                                                                    |
+|  [In-Memory Bounded Queue]     --> Max 10,000 items, drops on overflow       |
+|         │                                                                    |
+|         ▼                                                                    |
+|  [AsyncRemoteExporter]         --> Non-blocking daemon background worker     |
++---------------------------------------┬--------------------------------------+
+                                        │
+                                        │ HTTP POST /api/v1/traces
+                                        │ (Asynchronous, retry with backoff)
+                                        ▼
++------------------------------------------------------------------------------+
+|                   STANDALONE OBSERVABILITY SERVER (Port 8765)                |
+|                      (CLI runner OR standalone Windows .exe)                 |
+|                                                                              |
+|  [Security & Rate Gate]        --> Optional API Key auth, 10MB payload cap   |
+|         │                                                                    |
+|         ▼                                                                    |
+|  [Metrics & Anomaly Engine]    --> Evaluates tool loops & aggregates tokens  |
+|         │                                                                    |
+|         ▼                                                                    |
+|  [Pluggable Storage Engine]                                                  |
+|     ├── SQLite Storage (WAL Mode, synchronous=NORMAL, indexed queries)       |
+|     └── Cloud SQL / MySQL (SQLAlchemy pooling, pre-ping, connection recycle) |
+|         │                                                                    |
+|         ▼                                                                    |
+|  [Embedded Web Dashboard]      --> Glassmorphism Dark-Mode UI (Port 8765)    |
+|     ├── Interactive Mermaid.js DAG visualizer                                |
+|     ├── Waterfall Gantt timeline (HTTP -> Graph -> Node -> LLM -> Tool)      |
+|     ├── Color-coded state diff viewer (added, modified, appended)            |
+|     └── Model token & cost breakdown                                         |
++------------------------------------------------------------------------------+
+
+
+================================================================================
+4. CORE SUBSYSTEMS & TECHNICAL DEEP DIVES
+================================================================================
+
+--------------------------------------------------------------------------------
+A. Concurrency-Safe Tree Tracing (LangGraphTraceCallbackHandler)
+--------------------------------------------------------------------------------
+Problem:
+LangGraph workflows support dynamic asynchronous fan-outs where multiple nodes
+or tool executions run concurrently via asyncio.gather or parallel branches.
+Traditional APMs use a LIFO stack to track active spans, which crashes or
+misattributes parent-child relationships when tasks interleave.
+
+Solution:
+Authored a custom LangChain BaseCallbackHandler that deterministically tracks
+the tree structure using LangChain's unique run_id and parent_run_id UUIDs.
+By maintaining an internal, thread-safe mapping guarded by re-entrant locks
+alongside Python's task-local ContextVar mechanism, the tracer guarantees that
+every child span (LLM call, tool execution, or nested chain) is linked
+unambiguously to its exact parent node regardless of execution concurrency.
+
+--------------------------------------------------------------------------------
+B. Microsecond State Delta Engine (calculate_state_diff & Safe Serializer)
+--------------------------------------------------------------------------------
+Problem:
+Logging entire state snapshots on every graph step consumes massive database
+storage and forces developers to manually scan large JSON blobs to determine
+what actually changed.
+
+Solution:
+Constructed a recursive serialization engine that safely navigates circular
+references, LangChain BaseMessage objects, Pydantic models (v1 and v2), and
+dataclasses. The diff engine compares the state dictionary before and after
+each node execution, tagging mutations with explicit semantic operations:
+  * "added": New key introduced by the node.
+  * "modified": Value updated from an old state to a new state.
+  * "appended": Specifically optimized for chat message arrays. Detects list
+    growth and records only newly appended messages and counts rather than
+    duplicating the entire historical context.
+
+--------------------------------------------------------------------------------
+C. Automated Agent Loop & Anomaly Detection
+--------------------------------------------------------------------------------
+Problem:
+Unclear prompt guidelines or tool failures can trap an LLM in an infinite loop,
+re-invoking the same tool endlessly and draining inference budgets.
+
+Solution:
+Embedded an automated heuristic auditor inside Trace.compute_metrics():
+  * Monitors all TOOL spans recorded in the trace.
+  * Detects if any single tool is invoked 5 or more times total, OR 3 or more
+    times with identical input argument payloads.
+  * Automatically flags the trace with `has_tool_loop = True`, records the
+    offending tool name, and displays an amber warning badge on the live dashboard.
+
+--------------------------------------------------------------------------------
+D. Client-Side PII & Secret Redaction Engine (PIIMasker)
+--------------------------------------------------------------------------------
+Problem:
+Transmitting LLM prompts and agent states to observability backends often
+exposes customer PII, Bearer tokens, and sensitive API keys.
+
+Solution:
+Engineered an in-memory client-side scrubber that executes prior to network
+serialization:
+  * Pre-compiled high-performance regular expressions for:
+    - Email addresses
+    - Credit card numbers (16-digit patterns)
+    - US Social Security Numbers (SSNs)
+    - API keys and tokens (e.g., sk-*, Bearer ey*)
+    - International and domestic phone numbers
+  * Case-insensitive dictionary key scrubbing for sensitive identifiers
+    (password, token, access_token, api_key, cookie, secret, ssn, private_key).
+  * Safe recursive traversal with depth limiting to prevent stack overflows.
+
+--------------------------------------------------------------------------------
+E. Multi-Vendor Token Economics & Real-Time Cost Engine
+--------------------------------------------------------------------------------
+Problem:
+Modern multi-agent systems leverage heterogeneous models (e.g., GPT-4o for
+planning, Claude 3.5 Haiku for guardrails, Gemini Flash for summaries).
+Understanding consolidated operational cost requires normalized token accounting.
+
+Solution:
+Implemented a comprehensive token accounting matrix (`pricing.py`) supporting:
+  * OpenAI: GPT-4o, GPT-4o-mini, o1, o1-mini, o3-mini, GPT-4 Turbo, GPT-3.5
+  * Anthropic: Claude 3.7 Sonnet, Claude 3.5 Sonnet, Claude 3.5 Haiku, Claude 3 Opus
+  * Google: Gemini 1.5 Pro, 1.5 Flash, 2.0 Flash, 2.5 Flash, 2.5 Pro
+  * DeepSeek: DeepSeek-V3, DeepSeek-R1, DeepSeek-Chat, DeepSeek-Reasoner
+  * Meta / Open Source: Llama 3.3 70B, Llama 3.1 70B/8B, Mixtral 8x7B, Qwen 2.5 72B
+  * Dynamic pricing overrides via `register_model_pricing()`.
+  * Computes prompt cost, completion cost, and aggregated trace cost in USD.
+
+--------------------------------------------------------------------------------
+F. Pluggable Dual-Tier Storage Layer
+--------------------------------------------------------------------------------
+1. SQLite Storage Engine (Default / Local Development):
+   * Write-Ahead Logging (`PRAGMA journal_mode=WAL`) enabled for high-concurrency
+     non-blocking reads and writes.
+   * Connection isolation with thread-local pooling.
+   * In-memory LRU cache (128 items) and 3-second cached statistics aggregation.
+   * Multi-column indexes on status, start_time, duration_ms, and project.
+
+2. Cloud SQL / MySQL Engine (Production Distributed):
+   * Full SQLAlchemy integration with connection pooling.
+   * `pool_pre_ping=True` to eliminate stale/dropped connection socket errors.
+   * Automatic connection recycling (`pool_recycle=1800`) tailored for
+     Google Cloud SQL 30-minute proxy timeouts.
+
+--------------------------------------------------------------------------------
+G. Zero-Dependency Standalone Windows Binary (.exe)
+--------------------------------------------------------------------------------
+Problem:
+Non-technical team members, QA testers, and operations teams frequently require
+access to the observability UI without configuring Python virtual environments.
+
+Solution:
+Configured automated PyInstaller bundling via `build_exe.py`:
+  * Embeds FastAPI, Uvicorn, SQLAlchemy dialects, and the single-page HTML UI
+    into a self-contained ~49MB Windows binary (`langgraph-observe.exe`).
+  * Features an interactive console prompt to configure or override the database URL.
+  * Automatically detects OS display environment and opens the default web
+    browser directly to `http://127.0.0.1:8765/`.
+  * Incorporates crash-proof exit hooks so console logs remain visible on error.
+
+
+================================================================================
+5. FEATURE MATRIX & DASHBOARD CAPABILITIES
+================================================================================
+
+* Visual Graph Topology:
+  Automatically introspects LangGraph StateGraph definitions and draws an
+  interactive Mermaid.js DAG showing start/end boundaries, nodes, and conditional branches.
+
+* Waterfall Gantt Timeline:
+  Interactive timeline displaying microsecond timing offsets across the HTTP
+  request lifecycle, workflow initialization, individual node boundaries,
+  LLM calls, and tool executions.
+
+* Color-Coded State Diff Inspector:
+  Interactive viewer highlighting exact mutations between node states
+  (Green = Added keys, Blue = Appended array elements, Amber = Modified keys).
+
+* Real-Time Anomaly Alerting:
+  High-visibility warning indicators for infinite tool cycles and failed nodes
+  with complete exception stack traces.
+
+* Granular Filtering & Full-Text Search:
+  Filter by Status (Completed, Failed, Running), Project Name, Environment
+  (Production, Staging, Dev), Date/Time ranges, and keyword search.
+
+* Evaluation & Quality Logging:
+  Built-in `record_eval(name, score, passed, reason)` API generating EVAL
+  spans and scoring metadata within the active trace context.
+
+* Dual Deployment Modes:
+  Supports decoupled microservices via `instrument_fastapi()` or direct in-app
+  mounting via `mount_observability(app)`.
+
+
+================================================================================
+6. BENCHMARKS, QUALITY METRICS & TESTING
+================================================================================
+
+* Automated Test Coverage:
+  101 Unit and Integration Tests executing in Pytest with 100% pass rate.
+  Test suites cover:
+    - Callback run_id parent mapping under parallel async tasks
+    - ContextVar trace and collector propagation
+    - Middleware HTTP request capture and header injection
+    - Background queue non-blocking behavior under server downtime
+    - Regex PII masking and key sanitization
+    - Multi-provider token price calculations
+    - SQLite WAL persistence, indexing, and LRU caching
+    - MySQL Cloud SQL connection pre-ping and recycling
+    - Server REST endpoints, CORS filtering, and security authentication
+    - Standalone CLI commands and PyInstaller frozen asset loading
+
+* Production Latency Overhead:
+  Under 1 millisecond added to incoming client requests. Telemetry payloads
+  are serialized and pushed to an in-memory queue; all network transport occurs
+  in background asynchronous workers.
+
+* Fault Tolerance:
+  Client applications experience zero blocking or degradation if the
+  observability server becomes unreachable or restarts.
+
+
+================================================================================
+7. PORTFOLIO & RESUME ASSETS
+================================================================================
+
+--------------------------------------------------------------------------------
+A. Resume Bullet Points (Software Engineer / AI Systems / Platform)
+--------------------------------------------------------------------------------
+* Architected and released an open-source, decoupled observability platform for
+  LangGraph agent workflows in FastAPI, featuring non-blocking async telemetry,
+  state delta diffing, and automated tool loop detection.
+* Engineered a concurrency-safe callback handler mapping LangChain DAG run-id
+  trees across parallel async branches, eliminating trace corruption during
+  multi-agent fan-outs.
+* Developed an in-memory client-side PII scrubbing engine and multi-vendor token
+  pricing calculator (OpenAI, Anthropic, Gemini, DeepSeek), maintaining client
+  request overhead under 1ms.
+* Packaged a self-contained single-file Windows binary (.exe) bundling FastAPI,
+  SQLite (WAL mode), and an interactive Mermaid.js/Tailwind dashboard; maintained
+  100% pass rate across 101 automated unit/integration tests.
+
+--------------------------------------------------------------------------------
+B. 60-Second Elevator Pitch (Recruiter / Hiring Manager Screen)
+--------------------------------------------------------------------------------
+"I built LangGraph-Observe, a decoupled observability and tracing platform
+tailored specifically for stateful AI agents. Most standard APMs treat LLM calls
+like black-box HTTP requests, failing to capture agent-specific bugs like silent
+state drift, infinite tool loops, and prompt regressions. 
+
+To solve this, I designed a non-blocking client SDK and standalone server that
+captures microsecond state deltas between graph nodes, flags repetitive tool
+cycles, estimates costs across five major LLM providers, and dynamically renders
+the agent's DAG topology. The project has 101 automated tests with a 100% pass
+rate and compiles into a standalone Windows executable for zero-setup deployment."
+
+--------------------------------------------------------------------------------
+C. STAR Story (Behavioral & Technical Interviews)
+--------------------------------------------------------------------------------
+* Situation:
+  Stateful, cyclic multi-agent systems (like LangGraph) introduce complex failure
+  modes. Traditional APMs don't understand graph state or node loops, and cloud
+  platforms like LangSmith introduce proprietary vendor lock-in, recurring costs,
+  and privacy risks.
+
+* Task:
+  Design a lightweight, self-hosted, decoupled observability platform that can
+  trace LangGraph executions in any FastAPI application without adding latency or
+  compromising data privacy.
+
+* Action:
+  1. Developed a decoupled client SDK with a non-blocking in-memory queue and
+     background dispatcher to ensure zero client latency impact.
+  2. Overcame concurrency mismatches in parallel async branches by mapping
+     LangChain's unique run_id/parent_run_id hierarchy instead of relying on
+     naive LIFO call stacks.
+  3. Created an intelligent state delta engine to record only modified and
+     appended state keys (like message histories) instead of bloated full snapshots.
+  4. Built client-side PII masking to redact credentials before network transit.
+  5. Built an interactive dark-mode dashboard featuring Mermaid.js DAG diagrams,
+     Gantt waterfall charts, and token cost breakdowns.
+
+* Result:
+  Delivered a complete, enterprise-ready observability platform validated by
+  101 automated tests, supporting both local SQLite (WAL mode) and Google Cloud
+  SQL, packaged into a single-click 49MB Windows executable.
+
+--------------------------------------------------------------------------------
+D. System Design Interview Discussion Topics
+--------------------------------------------------------------------------------
+1. High-Throughput Telemetry in Python:
+   How to structure asynchronous background workers using Python's asyncio and
+   threading to decouple heavy JSON serialization and HTTP network dispatch
+   from user-facing FastAPI request loops.
+
+2. Deterministic Tree Reconstruction in Asynchronous Runtimes:
+   Why naive thread-local or stack-based tracing fails in modern async runtimes
+   (like asyncio.gather) and how using immutable ContextVar tokens and unique
+   run_id tree mapping guarantees trace integrity.
+
+3. Delta Encoding for State Persistence:
+   How state delta diffing minimizes storage bandwidth and database writes by
+   storing only mutations and array additions rather than repetitive, monolithic
+   state blobs.
+
+
+================================================================================
+8. CODE EXAMPLES & QUICKSTART
+================================================================================
+
+--------------------------------------------------------------------------------
+A. Instrumenting a FastAPI Application (Client SDK)
+--------------------------------------------------------------------------------
+from fastapi import FastAPI
+from typing import TypedDict
+from langgraph.graph import StateGraph, START, END
+from langgraph_observe import instrument_fastapi, observe_graph
+
+app = FastAPI(title="AI Agent Service")
+
+# 1. Attach observability middleware
+instrument_fastapi(
+    app,
+    server_url="http://localhost:8765",
+    environment="production",
+    project="customer-agent",
+    mask_pii=True
+)
+
+# 2. Define LangGraph workflow
+class AgentState(TypedDict):
+    query: str
+    response: str
+
+builder = StateGraph(AgentState)
+def process(state: AgentState) -> dict:
+    return {"response": f"Processed: {state['query']}"}
+
+builder.add_node("process", process)
+builder.add_edge(START, "process")
+builder.add_edge("process", END)
+
+# 3. Wrap compiled graph
+agent_graph = observe_graph(builder.compile(), name="AgentWorkflow")
+
+@app.post("/chat")
+async def chat(data: dict):
+    return await agent_graph.ainvoke({"query": data["query"], "response": ""})
+
+--------------------------------------------------------------------------------
+B. Starting the Server (Python CLI or Standalone Windows .exe)
+--------------------------------------------------------------------------------
+Option 1 (CLI):
+py -m langgraph_observe server --port 8765
+
+Option 2 (Windows Single Executable):
+Double-click: dist/langgraph-observe.exe
+Automatically boots the server and opens http://localhost:8765/ in your browser.
+
+================================================================================
+END OF DOSSIER
+================================================================================

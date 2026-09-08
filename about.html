@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About &amp; Contact — Sreekanth Pinnaka (SP.)</title>
+  <meta name="description" content="About Sreekanth Pinnaka. Software developer with close to 3 years delivering full-stack applications, LangGraph agentic workflows, cloud data platforms, and AST SQL guardrails." />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600&family=Geist:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            burgundy: {
+              primary: '#6F1D2B',
+              deep: '#4A101C',
+              dark: '#321018',
+              muted: '#8E3D4C'
+            },
+            rose: {
+              soft: '#C98A94',
+              dusty: '#E3BDC3'
+            },
+            ivory: {
+              warm: '#F8F3EE'
+            },
+            cream: '#EFE6DF',
+            charcoal: '#252122'
+          },
+          fontFamily: {
+            serif: ['"Instrument Serif"', 'Georgia', 'serif'],
+            sans: ['"Geist"', 'system-ui', 'sans-serif'],
+            mono: ['"Geist Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-warm-paper text-[#252122] antialiased min-h-screen relative overflow-x-hidden selection:bg-[#E3BDC3] selection:text-[#321018]">
+
+  <div id="scroll-progress"></div>
+  <div id="custom-cursor"></div>
+
+  <div id="global-toast">
+    <span>✓</span>
+    <span>Copied to clipboard</span>
+  </div>
+
+  <!-- ================= PERSISTENT NAVBAR ================= -->
+  <header id="main-header" class="fixed top-0 left-0 right-0 z-40 py-6 transition-all duration-300">
+    <div class="max-w-6xl mx-auto px-6 md:px-12 flex items-center justify-between">
+      
+      <a href="index.html" class="group flex items-center gap-2.5 focus:outline-none" aria-label="Back to home">
+        <span class="font-serif text-2xl md:text-3xl tracking-tight text-[#4A101C] group-hover:text-[#6F1D2B] transition-colors font-normal">
+          SP.
+        </span>
+        <span class="hidden sm:inline font-mono text-[10px] text-[#766C6D] border-l border-[#6F1D2B]/15 pl-2.5 uppercase tracking-wider">
+          Sreekanth Pinnaka
+        </span>
+      </a>
+
+      <!-- Page Navigation Links -->
+      <nav class="hidden md:flex items-center gap-8">
+        <ul class="flex items-center gap-7 text-xs font-mono uppercase tracking-wider text-[#766C6D]">
+          <li><a href="index.html" class="nav-link py-1 hover:text-[#4A101C] transition-colors">Home</a></li>
+          <li><a href="experience.html" class="nav-link py-1 hover:text-[#4A101C] transition-colors">Experience</a></li>
+          <li><a href="projects.html" class="nav-link py-1 hover:text-[#4A101C] transition-colors">Projects</a></li>
+          <li><a href="skills.html" class="nav-link py-1 hover:text-[#4A101C] transition-colors">Skills</a></li>
+          <li><a href="about.html" class="nav-link py-1 text-[#4A101C] font-semibold border-b-[1.5px] border-[#6F1D2B]">About</a></li>
+        </ul>
+
+        <div class="h-4 w-[1px] bg-[#6F1D2B]/15"></div>
+
+        <a href="https://github.com/sreekanthpinnaka" target="_blank" rel="noopener noreferrer" class="text-xs font-mono text-[#766C6D] hover:text-[#4A101C] transition-colors flex items-center gap-1" aria-label="GitHub">
+          <span>GitHub</span>
+          <span class="text-[#6F1D2B]">↗</span>
+        </a>
+
+        <div class="h-4 w-[1px] bg-[#6F1D2B]/15"></div>
+
+        <a href="#contact" class="group flex items-center gap-1.5 text-xs font-mono font-medium text-[#4A101C] hover:text-[#6F1D2B] transition-colors">
+          <span>Get in touch</span>
+          <span class="text-[#6F1D2B]">↗</span>
+        </a>
+      </nav>
+
+      <button id="mobile-menu-toggle" class="md:hidden p-2 text-[#4A101C] focus:outline-none" aria-label="Toggle menu">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+
+    </div>
+
+    <div id="mobile-menu" class="hidden md:hidden bg-[#F8F3EE] border-b border-[#6F1D2B]/15 px-6 py-5 shadow-lg">
+      <ul class="flex flex-col gap-4 text-xs font-mono uppercase tracking-wider text-[#766C6D]">
+        <li><a href="index.html" class="block py-1 hover:text-[#4A101C]">Home</a></li>
+        <li><a href="experience.html" class="block py-1 hover:text-[#4A101C]">Experience</a></li>
+        <li><a href="projects.html" class="block py-1 hover:text-[#4A101C]">Projects</a></li>
+        <li><a href="skills.html" class="block py-1 hover:text-[#4A101C]">Skills</a></li>
+        <li><a href="about.html" class="block py-1 text-[#4A101C] font-semibold">About</a></li>
+        <li class="pt-2 border-t border-[#6F1D2B]/10 flex items-center justify-between">
+          <a href="#contact" class="text-[#4A101C] font-semibold py-1">Get in touch ↗</a>
+          <a href="https://github.com/sreekanthpinnaka" target="_blank" rel="noopener noreferrer" class="text-[#6F1D2B] font-mono py-1">GitHub ↗</a>
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="relative z-10 pt-32 pb-24">
+    
+    <!-- About Section -->
+    <div class="max-w-6xl mx-auto px-6 md:px-12 mb-24">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-16">
+        <div class="md:col-span-3">
+          <div class="sticky top-28 flex items-center gap-2 font-mono text-xs text-[#6F1D2B] font-semibold tracking-widest uppercase">
+            <span>01 / ABOUT</span>
+          </div>
+        </div>
+
+        <div class="md:col-span-9 space-y-8">
+          <h1 class="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] text-[#252122] leading-[1.12] tracking-tight">
+            I enjoy building <span class="text-[#6F1D2B] italic">software</span>, <span class="text-[#6F1D2B] italic">reliable data pipelines</span>, and <span class="text-[#4A101C] italic">practical AI tools.</span>
+          </h1>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-4 text-sm sm:text-base text-[#766C6D] leading-relaxed font-normal">
+            <p>
+              I'm a software developer with close to 3 years of experience working on backend services, cloud data processing on AWS, and applied LLM workflows. I like working on systems that are predictable, well-tested, and genuinely helpful to the people using them.
+            </p>
+            <p>
+              Whether building open-source developer tooling like langgraph-observe, configuring PySpark jobs on AWS Glue, or implementing document search with pgvector, I focus on clean design, maintainable code, and steady progress.
+            </p>
+          </div>
+
+          <!-- Quick Education Credentials -->
+          <div class="pt-4 border-t border-[#6F1D2B]/10 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+            <div class="p-4 rounded-xl bg-[#EFE6DF]/50 border border-[#6F1D2B]/10">
+              <span class="text-[#6F1D2B] font-semibold block text-sm font-serif">M.S. Computer Science (GPA: 3.61)</span>
+              <span class="text-[#766C6D]">Missouri University of Science &amp; Technology · 2021–2023</span>
+              <p class="text-[11px] text-[#4A101C] mt-2">Coursework: Algorithms, Cloud Computing, Machine Learning in Computer Vision.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-[#EFE6DF]/50 border border-[#6F1D2B]/10">
+              <span class="text-[#6F1D2B] font-semibold block text-sm font-serif">M.S. Artificial Intelligence (Remote)</span>
+              <span class="text-[#766C6D]">Indiana Wesleyan University · 2026–Present</span>
+              <p class="text-[11px] text-[#4A101C] mt-2">Research: Multi-agent consensus protocols, autonomous reasoning bounds, and model evaluation.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Beyond Code Section -->
+    <div class="max-w-6xl mx-auto px-6 md:px-12 py-20 border-t border-[#6F1D2B]/10">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-14">
+        <div class="md:col-span-4 space-y-3">
+          <span class="font-mono text-xs text-[#6F1D2B] font-semibold tracking-widest uppercase">
+            02 / BEYOND CODE
+          </span>
+          <h2 class="font-serif text-2xl sm:text-3xl text-[#252122] font-normal tracking-tight">
+            When I'm not writing software...
+          </h2>
+        </div>
+
+        <div class="md:col-span-8 space-y-8">
+          <p class="font-serif text-lg sm:text-xl text-[#766C6D] italic leading-relaxed">
+            &ldquo;When I'm not writing code or working on data pipelines, I enjoy reading papers, experimenting with open-source developer tools, and learning more about systems and algorithms.&rdquo;
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-[#6F1D2B]/10">
+            <div class="space-y-1.5">
+              <span class="font-mono text-xs font-semibold text-[#6F1D2B] uppercase tracking-wider block">RESEARCH &amp; M.S.</span>
+              <p class="text-xs text-[#766C6D] leading-relaxed">Graduate AI research at Indiana Wesleyan &amp; M.S. Computer Science from Missouri S&amp;T (GPA: 3.61).</p>
+            </div>
+            <div class="space-y-1.5">
+              <span class="font-mono text-xs font-semibold text-[#6F1D2B] uppercase tracking-wider block">OPEN SOURCE</span>
+              <p class="text-xs text-[#766C6D] leading-relaxed">Authoring developer tools like langgraph-observe, AST security sandboxes, and multi-agent debate platforms.</p>
+            </div>
+            <div class="space-y-1.5">
+              <span class="font-mono text-xs font-semibold text-[#6F1D2B] uppercase tracking-wider block">OFFLINE</span>
+              <p class="text-xs text-[#766C6D] leading-relaxed">Algorithms study, technical architecture writing, continuous learning, and distance running.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= CONTACT CTA (DARK WINE) ================= -->
+    <section id="contact" class="w-full bg-[#321018] text-[#F8F3EE] py-32 px-6 md:px-12 mt-20 transition-colors">
+      <div class="max-w-6xl mx-auto space-y-16">
+        <div class="flex items-center gap-3">
+          <div class="h-[1px] w-8 bg-[#E3BDC3]"></div>
+          <span class="font-mono text-xs text-[#E3BDC3] font-semibold tracking-widest uppercase">
+            03 / GET IN TOUCH
+          </span>
+        </div>
+
+        <div class="space-y-4 max-w-4xl">
+          <h2 class="font-serif text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-normal tracking-tight leading-[1.05]">
+            Have an interesting <span class="italic text-[#E3BDC3] block sm:inline">problem to solve?</span>
+          </h2>
+          <p class="font-serif text-2xl sm:text-3xl text-[#C98A94] italic pt-2">
+            Let's build something useful.
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-6 border-t border-[#E3BDC3]/15">
+          <a href="mailto:sreekanth.ar104@gmail.com" class="group px-7 py-3.5 rounded-xl bg-[#F8F3EE] text-[#321018] font-mono text-xs uppercase tracking-wider font-bold hover:bg-[#EFE6DF] transition-all flex items-center gap-2 shadow-[0_4px_24px_-6px_rgba(248,243,238,0.2)]">
+            <span>Start a conversation</span>
+            <span class="text-[#6F1D2B] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">↗</span>
+          </a>
+
+          <button onclick="copyEmail()" class="px-5 py-3.5 rounded-xl border border-[#E3BDC3]/20 hover:border-[#E3BDC3]/50 text-[#EFE6DF] font-mono text-xs uppercase tracking-wider transition-all hover:bg-[#4A101C]/60 flex items-center gap-2 cursor-pointer">
+            <span>Copy Email</span>
+          </button>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-8 pt-6 text-xs font-mono text-[#C98A94]">
+          <span class="text-[#F8F3EE]">Phone: 573-466-3671</span>
+          <span class="text-[#E3BDC3]/40">•</span>
+          <a href="https://github.com/sreekanthpinnaka" target="_blank" rel="noopener noreferrer" class="hover:text-[#F8F3EE] transition-colors">GitHub ↗</a>
+          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="hover:text-[#F8F3EE] transition-colors">LinkedIn ↗</a>
+          <span class="text-[#E3BDC3]/40">•</span>
+          <span class="text-[#E3BDC3]/80">Available for Software Developer &amp; AI Engineer roles</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= MINIMAL FOOTER ================= -->
+  <footer class="w-full border-t border-[#6F1D2B]/10 py-12 px-6 md:px-12 bg-[#F8F3EE]">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs font-mono text-[#766C6D]">
+      <div class="flex items-center gap-2">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#6F1D2B]"></span>
+        <span>Designed &amp; built with curiosity · Sreekanth Pinnaka</span>
+      </div>
+
+      <div>
+        <span>&copy; 2026 SP. All rights reserved.</span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/sreekanthpinnaka" target="_blank" rel="noopener noreferrer" class="text-[#4A101C] hover:text-[#6F1D2B] transition-colors">GitHub ↗</a>
+        <button id="back-to-top" class="group flex items-center gap-1.5 text-[#4A101C] hover:text-[#6F1D2B] transition-colors cursor-pointer focus:outline-none" aria-label="Scroll back to top">
+          <span>Back to top</span>
+          <span class="text-[#6F1D2B] transition-transform group-hover:-translate-y-1">↑</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

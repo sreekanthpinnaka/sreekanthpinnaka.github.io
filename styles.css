@@ -1,0 +1,187 @@
+/* =========================================================================
+   EDITORIAL × BURGUNDY DESIGN SYSTEM (STATIC APPLICATION)
+   Colors: Burgundy (#6F1D2B), Deep Wine (#4A101C), Warm Ivory (#F8F3EE)
+   Typography: Instrument Serif + Geist Sans + Geist Mono
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600&family=Geist:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+
+:root {
+  --burgundy-primary: #6F1D2B;
+  --burgundy-deep: #4A101C;
+  --burgundy-dark: #321018;
+  --burgundy-muted: #8E3D4C;
+  --rose-soft: #C98A94;
+  --rose-dusty: #E3BDC3;
+  --ivory-warm: #F8F3EE;
+  --cream: #EFE6DF;
+  --neutral-soft: #E5DDD7;
+  --charcoal: #252122;
+  --muted-text: #766C6D;
+
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--ivory-warm);
+  color: var(--charcoal);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--rose-dusty);
+  color: var(--burgundy-dark);
+}
+
+/* Typography Utilities */
+.font-serif {
+  font-family: var(--font-serif);
+}
+.font-sans {
+  font-family: var(--font-sans);
+}
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Subtle Paper Texture */
+.bg-warm-paper {
+  background-color: var(--ivory-warm);
+  background-image: radial-gradient(rgba(111, 29, 43, 0.035) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Custom Scroll Progress Bar (2px Burgundy) */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background-color: var(--burgundy-primary);
+  z-index: 9999;
+  width: 0%;
+  pointer-events: none;
+  transition: width 0.05s ease-out;
+}
+
+/* Desktop Custom Cursor */
+#custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  background-color: var(--burgundy-primary);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
+              height 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
+              background-color 0.22s ease, 
+              border 0.22s ease,
+              opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--ivory-warm);
+  opacity: 0;
+}
+
+#custom-cursor.hover {
+  width: 28px;
+  height: 28px;
+  background-color: rgba(111, 29, 43, 0.12);
+  border: 1.5px solid var(--burgundy-primary);
+}
+
+#custom-cursor.view {
+  width: 68px;
+  height: 68px;
+  background-color: var(--burgundy-primary);
+  border: none;
+  box-shadow: 0 8px 24px -4px rgba(111, 29, 43, 0.4);
+}
+
+#custom-cursor.view::after {
+  content: 'VIEW';
+}
+
+@media (pointer: coarse) {
+  #custom-cursor {
+    display: none !important;
+  }
+}
+
+/* Editorial Fine Borders */
+.border-editorial {
+  border-color: rgba(111, 29, 43, 0.12);
+}
+
+.border-editorial-dark {
+  border-color: rgba(227, 189, 195, 0.15);
+}
+
+/* Hero Rotating Globe */
+#hero-globe-canvas {
+  filter: drop-shadow(0 4px 16px rgba(111, 29, 43, 0.1));
+  user-select: none;
+  touch-action: none;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ivory-warm);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--rose-dusty);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--rose-soft);
+}
+
+/* Global Toast Notification */
+#global-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  background-color: var(--burgundy-dark);
+  border: 1px solid rgba(227, 189, 195, 0.3);
+  color: var(--ivory-warm);
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#global-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
