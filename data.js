@@ -21,7 +21,7 @@ window.PORTFOLIO_DATA = {
         period: 'Jul 2026 — Present'
       },
       {
-        degree: 'M.S. Computer Science (GPA: 3.61)',
+        degree: 'M.S. Computer Science (GPA: 3.61 / 4.0)',
         institution: 'Missouri University of Science and Technology',
         period: 'Aug 2021 — May 2023',
         coursework: 'Algorithms, Cloud Computing, Machine Learning in Computer Vision'
@@ -226,13 +226,13 @@ window.PORTFOLIO_DATA = {
     {
       id: 'mst-grad',
       period: 'Aug 2021 — May 2023',
-      role: 'M.S. COMPUTER SCIENCE (GPA: 3.61)',
+      role: 'M.S. COMPUTER SCIENCE (GPA: 3.61 / 4.0)',
       company: 'MISSOURI UNIVERSITY OF SCIENCE AND TECHNOLOGY',
       location: 'Rolla, MO',
       summary: 'Completed rigorous graduate curriculum focused on Advanced Algorithms, Cloud Computing Systems, and Machine Learning in Computer Vision.',
       accomplishments: [
         'Conducted research into distributed cloud systems, algorithmic efficiency, and machine learning computer vision pipelines.',
-        'Maintained a 3.61 GPA across advanced systems engineering and computational theory coursework.',
+        'Maintained a 3.61 / 4.0 GPA across advanced systems engineering and computational theory coursework.',
         'Designed and presented architectural analyses of distributed data stores and high-concurrency cloud frameworks.'
       ],
       technologies: ['Python', 'C++', 'Cloud Computing', 'Algorithms', 'Machine Learning', 'Linux']
@@ -387,7 +387,7 @@ window.PORTFOLIO_DATA = {
     pillars: [
       {
         label: 'RESEARCH & M.S.',
-        detail: 'Graduate AI research at Indiana Wesleyan & M.S. Computer Science from Missouri S&T (GPA: 3.61).'
+        detail: 'Graduate AI research at Indiana Wesleyan & M.S. Computer Science from Missouri S&T (GPA: 3.61 / 4.0).'
       },
       {
         label: 'OPEN SOURCE',
