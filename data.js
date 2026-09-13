@@ -379,24 +379,5 @@ window.PORTFOLIO_DATA = {
       tag: 'DATA INFRA',
       explanation: 'Optimizing cloud lakehouse joins and partition pruning to handle recursive large-dataset loads with 25%+ speed improvements.'
     }
-  ],
-
-  // 09 / Beyond Code
-  beyondCode: {
-    narrative: "When I'm not writing code or working on data pipelines, I enjoy reading papers, experimenting with open-source developer tools, and learning more about systems and algorithms.",
-    pillars: [
-      {
-        label: 'RESEARCH & M.S.',
-        detail: 'Graduate AI research at Indiana Wesleyan & M.S. Computer Science from Missouri S&T (GPA: 3.61 / 4.0).'
-      },
-      {
-        label: 'OPEN SOURCE',
-        detail: 'Authoring developer tools like langgraph-observe, AST security sandboxes, and multi-agent debate platforms.'
-      },
-      {
-        label: 'OFFLINE',
-        detail: 'Algorithms study, technical architecture writing, continuous learning, and distance running.'
-      }
-    ]
-  }
+  ]
 };

@@ -463,9 +463,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     ARCHITECTURE PIPELINE // ${project.id}
                   </span>
                 </div>
-                <span class="font-mono text-[10px] text-[#6F1D2B] bg-[#E3BDC3]/40 px-2 py-0.5 rounded font-semibold">
-                  VERIFIED
-                </span>
               </div>
 
               <div class="space-y-3 py-4">
@@ -485,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
 
               <div class="mt-6 pt-4 border-t border-[#6F1D2B]/10 flex items-center justify-between text-[11px] font-mono text-[#766C6D]">
-                <span>Status: Production Verified</span>
+                <span>Architecture Spec</span>
                 <span class="text-[#6F1D2B] font-semibold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
                   Inspect Spec ↗
                 </span>
